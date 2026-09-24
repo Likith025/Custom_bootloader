@@ -1,0 +1,3 @@
+[submodule "Custom_bootloader/Drivers/STM32F756ZG-Bare-Metal-Driver-Development"]
+	path = Custom_bootloader/Drivers/STM32F756ZG-Bare-Metal-Driver-Development
+	url = https://github.com/Likith025/STM32F756ZG-Bare-Metal-Driver-Development.git

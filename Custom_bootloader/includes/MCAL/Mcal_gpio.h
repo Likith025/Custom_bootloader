@@ -28,7 +28,7 @@
 
 void Mcal_gpio_init(void);
 
-void Mcal_digital_write(GPIO_handler_t* gpio_handler,enable_e value);
+void Mcal_digital_write(digital_outputs_e output_signal,enable_e value);
 /* Function documentation can be generated using the Doxygen method template. */
 
 

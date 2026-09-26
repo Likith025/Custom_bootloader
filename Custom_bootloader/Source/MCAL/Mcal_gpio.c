@@ -55,9 +55,17 @@ void Mcal_gpio_init(void)
  *
  * @return Description of return value.
  */
-void Mcal_digital_write(GPIO_handler_t* gpio_handler,enable_e value)
+void Mcal_digital_write(digital_outputs_e output_signal,enable_e value)
 {
-	(void)GPIO_WritePin(gpio_handler->pGPIOx,gpio_handler->GPIO_pin_config.GPIO_PinNumber,(uint8_t)value);
+	GPIO_handler_t GPIO;
+	if(output_signal==Error_led)
+	{
+		GPIO=ErrorLed;
+	}
+	else{
+		GPIO=StatusLed;
+	}
+	(void)GPIO_WritePin(GPIO.pGPIOx,GPIO.GPIO_pin_config.GPIO_PinNumber,(uint8_t)value);
 }
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/

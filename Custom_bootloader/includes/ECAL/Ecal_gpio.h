@@ -1,5 +1,5 @@
 /**
- * @file    common_types.h
+ * @file    Ecal_gpio.h
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
@@ -8,34 +8,25 @@
  * @date    26-Sept-2026
  */
 
-#ifndef COMMON_TYPES_H_
-#define COMMON_TYPES_H_
+#ifndef ECAL_ECAL_GPIO_H_
+#define ECAL_ECAL_GPIO_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
-
+#include "common_types.h"
 
 /*------------------------------------------------------------------ Exported macros ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported types ------------------------------------------------------------------*/
-typedef enum enable_tag
-	{
-		disable=0,
-		enable
-	}enable_e;
-
-typedef enum digital_outputs_tag
-	{
-		Error_led=0,
-		Status_Led
-	}digital_outputs_e;
 
 /*------------------------------------------------------------------ Exported constants ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
+void Ecal_gpio_init(void);
 
+void Ecal_digital_write(digital_outputs_e output_signal,enable_e value);
 /* Function documentation can be generated using the Doxygen method template. */
 
 
-#endif /* COMMON_TYPES_H_ */
+#endif /* ECAL_ECAL_GPIO_H_ */

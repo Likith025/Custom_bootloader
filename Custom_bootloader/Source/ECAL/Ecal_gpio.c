@@ -1,20 +1,20 @@
 /**
- * @file    main.c
+ * @file    Ecal_gpio.c
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    24-Sept-2026
+ * @date    26-Sept-2026
  */
 
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
-
-#include <stdint.h>
-#include "common_types.h"
-#include "Mcal_gpio.h"
 #include "Ecal_gpio.h"
+#include "Mcal_gpio.h"
+
+#include "common_types.h"
+
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
@@ -30,21 +30,24 @@
  *
  * @return Description of return value.
  */
-
-int main()
+void Ecal_gpio_init(void)
 {
-	Ecal_gpio_init();
-	while(1)
-	{
-		Ecal_digital_write(Error_led, enable);
-		Ecal_digital_write(Status_Led, disable);
-		for(int i=0;i<1000000;i++);
-		Ecal_digital_write(Error_led, disable);
-		Ecal_digital_write(Status_Led, enable);
-		for(int i=0;i<1000000;i++);
-
-	}
+	Mcal_gpio_init();
 }
+
+/**
+ * @brief  Brief description of the function.
+ *
+ * @param  parameter Description of parameter.
+ *
+ * @return Description of return value.
+ */
+void Ecal_digital_write(digital_outputs_e output_signal,enable_e value)
+{
+
+	Mcal_digital_write(output_signal, value);
+}
+
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 

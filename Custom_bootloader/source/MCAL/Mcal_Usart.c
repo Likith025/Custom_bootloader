@@ -60,6 +60,19 @@ void Mcal_usart_send(uint8_t* pTxdata,uint32_t Length)
 	USART_SendData_IT(&USART3_handler, pTxdata, Length);
 }
 
+
+/**
+ * @brief  Brief description of the function.
+ *
+ * @param  parameter Description of parameter.
+ *
+ * @return Description of return value.
+ */
+void Mcal_usart_receive(uint8_t* pRxdata,uint32_t Length)
+{
+	USART_ReadData_IT(&USART3_handler, pRxdata, Length);
+}
+
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 
 /**

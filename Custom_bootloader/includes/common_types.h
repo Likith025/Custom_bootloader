@@ -1,35 +1,36 @@
 /**
- * @file    Mcal_gpio.h
+ * @file    common_types.h
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    24-Sept-2026
+ * @date    26-Sept-2026
  */
 
-#ifndef MCAL_MCAL_GPIO_H_
-#define MCAL_MCAL_GPIO_H_
+#ifndef COMMON_TYPES_H_
+#define COMMON_TYPES_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
-#include "device_headers.h"
-#include "common_types.h"
+
+
 /*------------------------------------------------------------------ Exported macros ------------------------------------------------------------------*/
 
-
 /*------------------------------------------------------------------ Exported types ------------------------------------------------------------------*/
+typedef enum enable_tag
+	{
+		disable=0,
+		enable
+	}enable_e;
+
 
 /*------------------------------------------------------------------ Exported constants ------------------------------------------------------------------*/
-
 
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
 
-void Mcal_gpio_init(void);
-
-void Mcal_digital_write(GPIO_handler_t* gpio_handler,enable_e value);
 /* Function documentation can be generated using the Doxygen method template. */
 
 
-#endif /* MCAL_MCAL_GPIO_H_ */
+#endif /* COMMON_TYPES_H_ */

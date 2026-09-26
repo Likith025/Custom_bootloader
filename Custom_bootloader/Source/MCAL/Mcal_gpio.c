@@ -13,14 +13,14 @@
 #include "Mcal_gpio.h"
 
 #include "device_headers.h"
-
+#include "common_types.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
-GPIO_handler_t* ErrorLed;
-GPIO_handler_t* StatusLed;
-GPIO_handler_t* UsartTX;
-GPIO_handler_t* UsartRX;
+GPIO_handler_t ErrorLed;
+GPIO_handler_t StatusLed;
+GPIO_handler_t UsartTX;
+GPIO_handler_t UsartRX;
 
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
@@ -48,6 +48,18 @@ void Mcal_gpio_init(void)
 }
 
 
+/**
+ * @brief  Initalizing pins for status led's and usart
+ *
+ * @param  parameter Description of parameter.
+ *
+ * @return Description of return value.
+ */
+void Mcal_digital_write(GPIO_handler_t* gpio_handler,enable_e value)
+{
+	(void)GPIO_WritePin(gpio_handler->pGPIOx,gpio_handler->GPIO_pin_config.GPIO_PinNumber,(uint8_t)value);
+}
+
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 
 /**
@@ -60,12 +72,13 @@ void Mcal_gpio_init(void)
 void ErrorLed_init()
 {
 	//PB14 as output
-	ErrorLed->pGPIOx=GPIO_B;
-	ErrorLed->GPIO_pin_config.GPIO_PinMode=GPIO_MODE_OUTPUT;
-	ErrorLed->GPIO_pin_config.GPIO_PinNumber=14U;
-	ErrorLed->GPIO_pin_config.GPIO_PinOutSpeed=GPIO_OPSPEED_LOW;
-	ErrorLed->GPIO_pin_config.GPIO_PinOutType=GPIO_OPTYPE_PUSH_PULL;
-	(void)GPIO_init(ErrorLed);
+	int8_t reval=0;
+	ErrorLed.pGPIOx=GPIO_B;
+	ErrorLed.GPIO_pin_config.GPIO_PinMode=GPIO_MODE_OUTPUT;
+	ErrorLed.GPIO_pin_config.GPIO_PinNumber=14U;
+	ErrorLed.GPIO_pin_config.GPIO_PinOutSpeed=GPIO_OPSPEED_LOW;
+	ErrorLed.GPIO_pin_config.GPIO_PinOutType=GPIO_OPTYPE_PUSH_PULL;
+	reval=GPIO_init(&ErrorLed);
 }
 
 
@@ -80,12 +93,12 @@ void StatusLed_init()
 {
 	//PB7 as output
 
-	StatusLed->pGPIOx=GPIO_B;
-	StatusLed->GPIO_pin_config.GPIO_PinMode=GPIO_MODE_OUTPUT;
-	StatusLed->GPIO_pin_config.GPIO_PinNumber=7U;
-		StatusLed->GPIO_pin_config.GPIO_PinOutSpeed=GPIO_OPSPEED_LOW;
-		StatusLed->GPIO_pin_config.GPIO_PinOutType=GPIO_OPTYPE_PUSH_PULL;
-		(void)GPIO_init(StatusLed);
+	StatusLed.pGPIOx=GPIO_B;
+	StatusLed.GPIO_pin_config.GPIO_PinMode=GPIO_MODE_OUTPUT;
+	StatusLed.GPIO_pin_config.GPIO_PinNumber=7U;
+	StatusLed.GPIO_pin_config.GPIO_PinOutSpeed=GPIO_OPSPEED_LOW;
+	StatusLed.GPIO_pin_config.GPIO_PinOutType=GPIO_OPTYPE_PUSH_PULL;
+	(void)GPIO_init(&StatusLed);
 }
 
 
@@ -100,14 +113,14 @@ void StatusLed_init()
 void UsartTX_init()
 {
 	//PD8 as USART3 TX
-	 UsartTX->pGPIOx = GPIO_D;
-	 UsartTX->GPIO_pin_config.GPIO_PinMode = GPIO_MODE_ALTERNATE_FUN;
-	 UsartTX->GPIO_pin_config.GPIO_PinNumber = 8;
-	 UsartTX->GPIO_pin_config.GPIO_PinOutType = GPIO_OPTYPE_PUSH_PULL;
-	 UsartTX->GPIO_pin_config.GPIO_PinOutSpeed = GPIO_OPSPEED_LOW;
-	 UsartTX->GPIO_pin_config.GPIO_PinPushPullResistor = GPIO_PUPD_NO;
-	 UsartTX->GPIO_pin_config.GPIO_PinAltFun = 7;
-	 (void)GPIO_init(UsartTX);
+	 UsartTX.pGPIOx = GPIO_D;
+	 UsartTX.GPIO_pin_config.GPIO_PinMode = GPIO_MODE_ALTERNATE_FUN;
+	 UsartTX.GPIO_pin_config.GPIO_PinNumber = 8;
+	 UsartTX.GPIO_pin_config.GPIO_PinOutType = GPIO_OPTYPE_PUSH_PULL;
+	 UsartTX.GPIO_pin_config.GPIO_PinOutSpeed = GPIO_OPSPEED_LOW;
+	 UsartTX.GPIO_pin_config.GPIO_PinPushPullResistor = GPIO_PUPD_NO;
+	 UsartTX.GPIO_pin_config.GPIO_PinAltFun = 7;
+	 (void)GPIO_init(&UsartTX);
 }
 
 
@@ -121,12 +134,12 @@ void UsartTX_init()
 void UsartRX_init()
 {
 	//PD9 as USART3 TX
-	 UsartRX->pGPIOx = GPIO_D;
-	 UsartRX->GPIO_pin_config.GPIO_PinMode = GPIO_MODE_ALTERNATE_FUN;
-	 UsartRX->GPIO_pin_config.GPIO_PinNumber = 9;
-	 UsartRX->GPIO_pin_config.GPIO_PinOutType = GPIO_OPTYPE_PUSH_PULL;
-	 UsartRX->GPIO_pin_config.GPIO_PinOutSpeed = GPIO_OPSPEED_LOW;
-	 UsartRX->GPIO_pin_config.GPIO_PinPushPullResistor = GPIO_PUPD_NO;
-	 UsartRX->GPIO_pin_config.GPIO_PinAltFun = 7;
-	 (void)GPIO_init(UsartRX);
+	 UsartRX.pGPIOx = GPIO_D;
+	 UsartRX.GPIO_pin_config.GPIO_PinMode = GPIO_MODE_ALTERNATE_FUN;
+	 UsartRX.GPIO_pin_config.GPIO_PinNumber = 9;
+	 UsartRX.GPIO_pin_config.GPIO_PinOutType = GPIO_OPTYPE_PUSH_PULL;
+	 UsartRX.GPIO_pin_config.GPIO_PinOutSpeed = GPIO_OPSPEED_LOW;
+	 UsartRX.GPIO_pin_config.GPIO_PinPushPullResistor = GPIO_PUPD_NO;
+	 UsartRX.GPIO_pin_config.GPIO_PinAltFun = 7;
+	 (void)GPIO_init(&UsartRX);
 }

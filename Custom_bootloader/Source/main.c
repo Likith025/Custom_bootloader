@@ -12,10 +12,15 @@
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
 
 #include <stdint.h>
+#include "common_types.h"
+#include "Mcal_gpio.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
-
+extern GPIO_handler_t ErrorLed;
+extern GPIO_handler_t StatusLed;
+extern GPIO_handler_t UsartTX;
+extern GPIO_handler_t UsartRX;
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -30,15 +35,16 @@
 
 int main()
 {
-	uint8_t a=10;
-	uint8_t b=30;
-
-	uint8_t c=0;
-
-	c=a+b;
+	Mcal_gpio_init();
 	while(1)
 	{
-		c++;
+		Mcal_digital_write(&ErrorLed, enable);
+		Mcal_digital_write(&StatusLed, enable);
+		for(int i=0;i<1000000;i++);
+		Mcal_digital_write(&ErrorLed, disable);
+		Mcal_digital_write(&StatusLed, disable);
+		for(int i=0;i<1000000;i++);
+
 	}
 }
 

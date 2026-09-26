@@ -15,10 +15,12 @@
 #include "common_types.h"
 #include "Mcal_gpio.h"
 #include "Ecal_gpio.h"
+#include "Mcal_Usart.h"
+#include "Mcal_Intrrupt.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
-
+char txdata[]="liki\n\r";
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -34,11 +36,14 @@
 int main()
 {
 	Ecal_gpio_init();
+	Mcal_usart_init();
+	mcal_intrrupt_config();
 	while(1)
 	{
 		Ecal_digital_write(Error_led, enable);
 		Ecal_digital_write(Status_Led, disable);
 		for(int i=0;i<1000000;i++);
+		Mcal_usart_send(txdata, sizeof(txdata));
 		Ecal_digital_write(Error_led, disable);
 		Ecal_digital_write(Status_Led, enable);
 		for(int i=0;i<1000000;i++);

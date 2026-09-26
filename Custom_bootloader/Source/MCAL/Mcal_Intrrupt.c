@@ -1,15 +1,16 @@
 /**
- * @file    Mcal_Usart.c
+ * @file    Mcal_Intrrupt.c
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    24-Sept-2026
+ * @date    26-Sept-2026
  */
 
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
+#include "Mcal_Intrrupt.h"
 #include "Mcal_Usart.h"
 
 #include "device_headers.h"
@@ -17,9 +18,7 @@
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
-
-USART_handler_t USART3_handler;
-
+extern USART_handler_t USART3_handler;
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -31,22 +30,10 @@ USART_handler_t USART3_handler;
  *
  * @return Description of return value.
  */
-
-void Mcal_usart_init(void)
+void mcal_intrrupt_config(void)
 {
-	USART3_handler.pUSART=USART_3;
-	USART3_handler.USART_config.USART_Mode=USART_MODE_TXRX;
-	USART3_handler.USART_config.USART_WordLength=USART_WordLen_8bits;
-	USART3_handler.USART_config.USART_OverSmapling=USART_OverSampling_8;
-	USART3_handler.USART_config.USART_StopBits=USART_StopBits_1;
-	USART3_handler.USART_config.USART_ParityControl=USART_Parity_None;
-	USART3_handler.USART_config.USART_HWflowControl=USART_HW_FlowCtrl_None;
-	USART3_handler.USART_config.USART_BaudRate=USART_BAUD_9600;
-	USART3_handler.UASRT_Rxstate=USART_FREE;
-	USART3_handler.UASRT_Txstate=USART_FREE;
-	USART_init(&USART3_handler,ENABLE);
+	IntrruptConfig(IRQ_NO_USART3, 5, ENABLE);
 }
-
 
 /**
  * @brief  Brief description of the function.
@@ -55,10 +42,11 @@ void Mcal_usart_init(void)
  *
  * @return Description of return value.
  */
-void Mcal_usart_send(uint8_t* pTxdata,uint32_t Length)
+void USART3_IRQHandler(void)
 {
-	USART_SendData_IT(&USART3_handler, pTxdata, Length);
+    USART_IRQHandler(&USART3_handler);
 }
+
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 

@@ -33,7 +33,7 @@ void bootloader_run(void)
 	while(1)
 	{
 	printmsg("running in boot mode\n\r");
-	for(volatile int i=0;i<1000000;i++);
+	for(volatile int i=0;i<2000000;i++);
 	}
 }
 

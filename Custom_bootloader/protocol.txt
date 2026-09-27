@@ -1,0 +1,206 @@
+========================================================================
+STM32F756ZG BOOTLOADER - HOST-BASED FLASHING PROTOCOL
+Design notes & decision log
+Custom bare-metal bootloader (GPIO/USART drivers, no HAL)
+========================================================================
+
+1. BOOTLOADER -> APPLICATION HANDOFF (VALIDATED)
+------------------------------------------------------------------------
+Bootloader resides at 0x08000000, application at 0x08010000, flashed
+and validated separately via JTAG.
+
+At reset:
+  - Mode pin NOT pressed -> jump to application
+  - Mode pin pressed     -> remain in bootloader
+
+Confirmed working on target (serial log: bootloader entry, MSP /
+reset-handler read from app vector table, application running,
+re-entry into bootloader on mode-pin hold).
+
+
+2. RECOVERY MODEL (DELIBERATE DEFERRAL)
+------------------------------------------------------------------------
+No valid-application flag or automatic fallback is implemented yet.
+If flashing is interrupted (e.g. power loss mid-write), the boot
+decision remains mode-pin-only - a corrupted application image can
+still be jumped into on next reset. Recovery today requires a human
+physically holding the mode pin.
+
+OPEN RISK: acceptable for lab/bring-up use; must be revisited
+(valid-image flag checked before auto-jump) before any field
+deployment without physical board access.
+
+
+3. FLASH ERASE & WRITE STRATEGY
+------------------------------------------------------------------------
+  - Bootloader occupies sectors 0-1 (protected, never erased/written
+    by protocol commands).
+  - BL_FLASH_ERASE performs a single mass erase of sectors 2->N.
+    No per-sector/incremental erase in MVP.
+  - Every flashing session is therefore a full reflash - no
+    partial/differential update path yet.
+  - BL_MEM_WRITE does NOT auto-erase - erase is always done once,
+    upfront, by BL_FLASH_ERASE.
+
+
+4. VERIFICATION STRATEGY
+------------------------------------------------------------------------
+Verification is CRC-based, not full readback. After all BL_MEM_WRITE
+calls complete, host sends a single BL_GET_CRC over the full
+application image range (addr = 0x08010000, len = actual binary
+size - not the full erased/sector range).
+
+Bootloader only COMPUTES and RETURNS the CRC32; the host performs
+the match/mismatch comparison against its local file CRC. On
+mismatch there is no device-side auto-retry - given full-reflash-
+on-any-fault, the session is simply reported as failed and re-run
+from the top.
+
+
+5. APPLICATION JUMP (BL_GO_TO_ADDR)
+------------------------------------------------------------------------
+Jump is host-triggered, not automatic after a successful write+verify.
+
+Rationale:
+  - Supports multi-region sessions
+  - Avoids a UART hand-off race between bootloader and application
+  - Lets the host stay in bootloader for further diagnostics after
+    a successful flash
+
+Bootloader sends ACK BEFORE attempting the jump (once UART hands off
+to the application, the bootloader can no longer respond). This ACK
+confirms only that the command was received/validated and a jump is
+being attempted - it is NOT confirmation that the application is
+running.
+
+NOTE: The mode-pin boot path and BL_GO_TO_ADDR are two different
+triggers into the same underlying jump routine - implement as one
+shared function to avoid drift between the two entry points.
+
+
+6. WIRE FRAME FORMAT
+------------------------------------------------------------------------
+
+Command frame (Host -> Bootloader):
+
+  Field       Size         Notes
+  ---------   ----------   -----------------------------------------
+  SOF         1 B          0xA5 - fixed sync byte; command codes
+                            alone are not reserved enough from line
+                            noise to safely double as frame start
+  CMD         1 B          Command code, 0x51-0x5D range
+  LEN         2 B          Payload length only (excludes SOF/CMD/
+                            LEN/CHECKSUM)
+  PAYLOAD     LEN bytes    Command-specific data
+  CHECKSUM    1 B          XOR over CMD + LEN + PAYLOAD (SOF excluded)
+
+Response frame (Bootloader -> Host):
+
+  Field       Size         Notes
+  ---------   ----------   -----------------------------------------
+  CMD         1 B          Echo of the request command code
+  STATUS      1 B          0x00 = success; else fault code (Sec. 8)
+  LEN         2 B          Response payload length (0 for pure
+                            ACK/NACK)
+  PAYLOAD     LEN bytes    e.g. version byte, CRC32, etc.
+  CHECKSUM    1 B          Same coverage rule as request
+
+No dedicated command/response type field. Frame shape (presence of
+STATUS) already disambiguates the two on this point-to-point link.
+Revisit only if a passive sniffer/replay tool parsing both directions
+without side-channel context is ever built - host-side event logging
+("host asked for version", "bootloader replied X") does not need
+this, since the host already knows what it just sent.
+
+
+7. MVP COMMAND SET
+------------------------------------------------------------------------
+
+  Command          Code   Request payload          Response payload      Purpose
+  --------------   ----   ----------------------   --------------------  -----------------------------------------
+  BL_GET_VER       0x51   -                        Version (1 B)         Host<->device sanity check
+  BL_GO_TO_ADDR     0x55   addr (4 B)               - (ACK before jump)   Host-triggered jump to application
+  BL_FLASH_ERASE   0x56   -                        -                     Mass erase, sectors 2->N (0-1 protected)
+  BL_MEM_WRITE     0x57   addr (4 B) + data (N)    -                     Write one chunk; NACK if addr in
+                                                                          bootloader region
+  BL_GET_CRC       0x5D   addr (4 B) + len (4 B)   CRC32 (4 B)           CRC of specified region; host compares
+
+Flash flow:
+  BL_GET_VER -> BL_FLASH_ERASE -> BL_MEM_WRITE x N -> BL_GET_CRC
+  (once, full image range) -> host compares -> BL_GO_TO_ADDR
+  (only if match)
+
+Parked for later (not discarded):
+  BL_GET_HELP, BL_GET_CID, BL_GET_RDP_STATUS, BL_EN_R_W_PROTECT,
+  BL_DIS_R_W_PROTECT, BL_READ_SECTOR_STATUS, BL_OTP_READ, BL_MEM_READ
+
+  - GET_HELP/GET_CID: deferrable until a second board variant or
+    third-party host tool exists.
+  - RDP/R-W protect/sector-status/OTP: production security
+    hardening, separate concern from bring-up flashing - RDP level
+    transitions (e.g. RDP1->0) can mass-erase the chip and need
+    dedicated care when revisited.
+  - MEM_READ: not needed since verification is CRC-based, not full
+    readback.
+
+
+8. FAULT CODE ENUM (shared STATUS byte, all commands)
+------------------------------------------------------------------------
+
+  Value   Name                    Meaning
+  -----   ---------------------   ------------------------------------
+  0x00    BL_ACK                  Success / command executed
+  0x01    BL_NACK_INVALID_CMD     Unrecognized command code
+  0x02    BL_NACK_CHECKSUM        Frame checksum mismatch
+  0x03    BL_NACK_INVALID_ADDR    Address out of range or inside
+                                   protected bootloader region
+  0x04    BL_NACK_INVALID_LEN     LEN exceeds max payload / buffer
+                                   capacity
+  0x05    BL_NACK_ERASE_FAIL      Flash erase hardware operation
+                                   failed
+  0x06    BL_NACK_WRITE_FAIL      Flash write failed - single generic
+                                   code for now (not split into
+                                   "unerased target" vs "HW fault")
+  0x07    BL_NACK_TIMEOUT         Frame reception timed out mid-
+                                   transfer
+
+No CRC-mismatch fault code: the bootloader never judges match/
+mismatch (Section 4), so this verdict has no corresponding
+device-side status.
+
+
+9. RX ARCHITECTURE
+------------------------------------------------------------------------
+  - USART RX is ISR-driven: the ISR only pushes raw bytes into a
+    ring buffer.
+  - Frame parsing (SOF detection, CMD/LEN/PAYLOAD/CHECKSUM state
+    machine) happens in a separate function outside the ISR,
+    decoupling arrival timing from parsing.
+  - State machine:
+      IDLE -> SOF seen -> READING_LEN -> READING_PAYLOAD ->
+      READING_CHECKSUM -> COMPLETE
+    with an inter-byte timeout resetting to IDLE from any non-IDLE
+    state (protects against a corrupted LEN causing an indefinite
+    wait).
+  - Ring buffer will use head/tail + modulo indexing; full-vs-empty
+    disambiguation method (reserved slot / count variable / flag)
+    to be finalized during implementation.
+
+
+10. OPEN ITEMS (deferred to implementation)
+------------------------------------------------------------------------
+  - Max BL_MEM_WRITE payload size - depends on final ring buffer
+    size (not yet sized).
+  - Inter-byte/frame timeout - placeholder loop-and-counter for now;
+    to be replaced with a SysTick-based millisecond timer. NOTE: a
+    busy-wait/instruction-count based timer is NOT a true time-based
+    timeout - its real duration depends on clock config, compiler
+    optimization, and ISR load, and will silently drift if any of
+    those change.
+  - Ring buffer full/empty disambiguation - to be decided when the
+    ring buffer is implemented.
+
+------------------------------------------------------------------------
+Frame format, MVP command set, and fault codes are finalized.
+Remaining open items are implementation-driven, not protocol-driven.
+========================================================================

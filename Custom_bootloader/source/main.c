@@ -20,6 +20,7 @@
 #include "digital_signal_services.h"
 #include "print_handler.h"
 #include "Jump_app.h"
+#include "BootLoader.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
@@ -46,6 +47,7 @@ int main()
 	mcal_intrrupt_config();
 	Get_boot_mode();
 
+	printmsg("entered Bootloader\n\r");
 	if(Boot_mode==Application_mode)
 	{
 		//in application mode
@@ -53,7 +55,7 @@ int main()
 	}
 	else
 	{
-		//in boot mode
+		bootloader_run();
 
 	}
 	while(1)

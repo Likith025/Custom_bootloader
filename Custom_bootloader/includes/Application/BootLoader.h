@@ -25,6 +25,6 @@
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
 
 /* Function documentation can be generated using the Doxygen method template. */
-
+void bootloader_run(void);
 
 #endif /* APPLICATION_BOOTLOADER_H_ */

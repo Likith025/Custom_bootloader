@@ -12,7 +12,7 @@
 #define COMMON_TYPES_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
-
+#include <stdint.h>
 
 /*------------------------------------------------------------------ Exported macros ------------------------------------------------------------------*/
 
@@ -26,8 +26,15 @@ typedef enum enable_tag
 typedef enum digital_outputs_tag
 	{
 		Error_led=0,
-		Status_Led
-	}digital_outputs_e;
+		Status_Led,
+		Mode_Switch,
+	}digital_signals_e;
+
+typedef enum boot_mode_tag
+{
+	Application_mode=0,
+	Bootloader_mode,
+}Boot_mode_e;
 
 /*------------------------------------------------------------------ Exported constants ------------------------------------------------------------------*/
 

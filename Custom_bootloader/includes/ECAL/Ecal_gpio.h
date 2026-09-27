@@ -25,7 +25,8 @@
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
 void Ecal_gpio_init(void);
 
-void Ecal_digital_write(digital_outputs_e output_signal,enable_e value);
+void Ecal_digital_write(digital_signals_e output_signal,enable_e value);
+uint8_t Ecal_digital_read(digital_signals_e output_signal);
 /* Function documentation can be generated using the Doxygen method template. */
 
 

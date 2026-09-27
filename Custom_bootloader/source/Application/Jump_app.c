@@ -1,32 +1,25 @@
 /**
- * @file    main.c
+ * @file    Jump_app.c
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    24-Sept-2026
+ * @date    27-Sept-2026
  */
 
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
-
-#include <stdint.h>
-#include "common_types.h"
-#include "Mcal_gpio.h"
-#include "Ecal_gpio.h"
-#include "Mcal_Usart.h"
-#include "Mcal_Intrrupt.h"
-#include "digital_signal_services.h"
-#include "print_handler.h"
 #include "Jump_app.h"
+#include "common_types.h"
+#include "device_headers.h"
+#include "print_handler.h"
+
+
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
-
+#define SECTOR_2_ADDR		(0x08010000)
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
-uint8_t txdata[]="liki\n\r";
-uint8_t rxdata[4]={};
-uint8_t msg_count=0;
-
+//uint32_t sector_2_addr= 0x08010000;
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -38,29 +31,23 @@ uint8_t msg_count=0;
  *
  * @return Description of return value.
  */
-
-int main()
-{
-	Ecal_gpio_init();
-	Mcal_usart_init();
-	mcal_intrrupt_config();
-	Get_boot_mode();
-
-	if(Boot_mode==Application_mode)
+	void jump_to_application(void)
 	{
-		//in application mode
-		jump_to_application();
-	}
-	else
-	{
-		//in boot mode
+		 printmsg("started jump tp application process\r\n");
+		 void (*app_reset_handler)(void);
+		 uint32_t app_msp_value;
+		 uint32_t app_reset_handler_addr;
+		 app_msp_value=*(volatile uint32_t*)SECTOR_2_ADDR;
+		 printmsg("msp of app is at %x\r\n",SECTOR_2_ADDR);
 
+		 app_reset_handler_addr=*(volatile uint32_t*)(SECTOR_2_ADDR+0x4);
+		 printmsg("reset handler of app is at %x\r\n",(SECTOR_2_ADDR+0x4));
+		 app_reset_handler=(void*)app_reset_handler_addr;
+		 SCB->VTOR=SECTOR_2_ADDR;
+		// __set_MSP(app_msp_value);
+		 __asm volatile ("MSR msp, %0" : : "r" (app_msp_value) : );
+		 app_reset_handler();
 	}
-	while(1)
-	{
-
-	}
-}
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 

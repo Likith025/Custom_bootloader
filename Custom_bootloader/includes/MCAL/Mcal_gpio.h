@@ -28,7 +28,8 @@
 
 void Mcal_gpio_init(void);
 
-void Mcal_digital_write(digital_outputs_e output_signal,enable_e value);
+void Mcal_digital_write(digital_signals_e output_signal,enable_e value);
+uint8_t Mcal_digital_read(digital_signals_e input_signal);
 /* Function documentation can be generated using the Doxygen method template. */
 
 

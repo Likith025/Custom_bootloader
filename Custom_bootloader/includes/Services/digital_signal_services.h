@@ -1,5 +1,5 @@
 /**
- * @file    Ecal_usart.h
+ * @file    digital_signal_services.h
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
@@ -8,8 +8,8 @@
  * @date    26-Sept-2026
  */
 
-#ifndef ECAL_ECAL_USART_H_
-#define ECAL_ECAL_USART_H_
+#ifndef SERVICES_DIGITAL_SIGNAL_SERVICES_H_
+#define SERVICES_DIGITAL_SIGNAL_SERVICES_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
 #include "common_types.h"
@@ -21,10 +21,10 @@
 /*------------------------------------------------------------------ Exported constants ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
-
+extern Boot_mode_e Boot_mode;
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
-void Ecal_usart_send(uint8_t* pTxdata,uint32_t len);
+void Get_boot_mode(void);
 /* Function documentation can be generated using the Doxygen method template. */
 
 
-#endif /* ECAL_ECAL_USART_H_ */
+#endif /* SERVICES_DIGITAL_SIGNAL_SERVICES_H_ */

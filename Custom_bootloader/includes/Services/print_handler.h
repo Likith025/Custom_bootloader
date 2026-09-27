@@ -1,18 +1,21 @@
 /**
- * @file    Ecal_usart.h
+ * @file    print_handler.h
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    26-Sept-2026
+ * @date    27-Sept-2026
  */
 
-#ifndef ECAL_ECAL_USART_H_
-#define ECAL_ECAL_USART_H_
+#ifndef SERVICES_PRINT_HANDLER_H_
+#define SERVICES_PRINT_HANDLER_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
-#include "common_types.h"
+
+#include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 /*------------------------------------------------------------------ Exported macros ------------------------------------------------------------------*/
 
@@ -23,8 +26,8 @@
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
-void Ecal_usart_send(uint8_t* pTxdata,uint32_t len);
+void printmsg(char *format,...);
 /* Function documentation can be generated using the Doxygen method template. */
 
 
-#endif /* ECAL_ECAL_USART_H_ */
+#endif /* SERVICES_PRINT_HANDLER_H_ */

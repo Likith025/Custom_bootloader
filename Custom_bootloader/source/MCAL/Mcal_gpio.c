@@ -21,9 +21,11 @@ GPIO_handler_t ErrorLed;
 GPIO_handler_t StatusLed;
 GPIO_handler_t UsartTX;
 GPIO_handler_t UsartRX;
+GPIO_handler_t ModeSwitch;
 
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
+void ModeSwitch_init(void);
 void ErrorLed_init(void);
 void StatusLed_init(void);
 void UsartTX_init(void);
@@ -45,6 +47,7 @@ void Mcal_gpio_init(void)
 	StatusLed_init();
 	UsartTX_init();
 	UsartRX_init();
+	ModeSwitch_init();
 }
 
 
@@ -55,20 +58,58 @@ void Mcal_gpio_init(void)
  *
  * @return Description of return value.
  */
-void Mcal_digital_write(digital_outputs_e output_signal,enable_e value)
+uint8_t Mcal_digital_read(digital_signals_e input_signal)
+{
+	GPIO_handler_t GPIO;
+	uint8_t read_value;
+	GPIO=ModeSwitch;
+
+	read_value=GPIO_ReadPin(GPIO.pGPIOx,GPIO.GPIO_pin_config.GPIO_PinNumber);
+	return read_value;
+}
+
+/**
+ * @brief  Initalizing pins for status led's and usart
+ *
+ * @param  parameter Description of parameter.
+ *
+ * @return Description of return value.
+ */
+void Mcal_digital_write(digital_signals_e output_signal,enable_e value)
 {
 	GPIO_handler_t GPIO;
 	if(output_signal==Error_led)
 	{
 		GPIO=ErrorLed;
 	}
-	else{
+	else if(output_signal==Status_Led){
 		GPIO=StatusLed;
+	}
+	else{
+		// do nothing
 	}
 	(void)GPIO_WritePin(GPIO.pGPIOx,GPIO.GPIO_pin_config.GPIO_PinNumber,(uint8_t)value);
 }
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
+/**
+ * @brief  Brief description of the function.
+ *
+ * @param  parameter Description of parameter.
+ *
+ * @return Description of return value.
+ */
+void ModeSwitch_init()
+{
+	//PB14 as output
+	int8_t reval=0;
+	ModeSwitch.pGPIOx=GPIO_C;
+	ModeSwitch.GPIO_pin_config.GPIO_PinMode=GPIO_MODE_INPUT;
+	ModeSwitch.GPIO_pin_config.GPIO_PinNumber=13U;
+	ModeSwitch.GPIO_pin_config.GPIO_PinOutSpeed=GPIO_OPSPEED_LOW;
+	ModeSwitch.GPIO_pin_config.GPIO_PinOutType=GPIO_OPTYPE_PUSH_PULL;
+	reval=GPIO_init(&ModeSwitch);
+}
 
 /**
  * @brief  Brief description of the function.

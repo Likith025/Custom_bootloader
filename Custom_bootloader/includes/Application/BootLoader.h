@@ -1,5 +1,5 @@
 /**
- * @file    Ecal_usart.h
+ * @file    BootLoader.h
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
@@ -8,12 +8,12 @@
  * @date    26-Sept-2026
  */
 
-#ifndef ECAL_ECAL_USART_H_
-#define ECAL_ECAL_USART_H_
+#ifndef APPLICATION_BOOTLOADER_H_
+#define APPLICATION_BOOTLOADER_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
-#include "common_types.h"
 
+#include "common_types.h"
 /*------------------------------------------------------------------ Exported macros ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported types ------------------------------------------------------------------*/
@@ -23,8 +23,8 @@
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
-void Ecal_usart_send(uint8_t* pTxdata,uint32_t len);
+
 /* Function documentation can be generated using the Doxygen method template. */
 
 
-#endif /* ECAL_ECAL_USART_H_ */
+#endif /* APPLICATION_BOOTLOADER_H_ */

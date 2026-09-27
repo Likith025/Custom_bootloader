@@ -1,18 +1,18 @@
 /**
- * @file    Ecal_usart.h
+ * @file    Jump_app.h
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    26-Sept-2026
+ * @date    27-Sept-2026
  */
 
-#ifndef ECAL_ECAL_USART_H_
-#define ECAL_ECAL_USART_H_
+#ifndef APPLICATION_JUMP_APP_H_
+#define APPLICATION_JUMP_APP_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
-#include "common_types.h"
+
 
 /*------------------------------------------------------------------ Exported macros ------------------------------------------------------------------*/
 
@@ -23,8 +23,8 @@
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
-void Ecal_usart_send(uint8_t* pTxdata,uint32_t len);
+	void jump_to_application(void);
 /* Function documentation can be generated using the Doxygen method template. */
 
 
-#endif /* ECAL_ECAL_USART_H_ */
+#endif /* APPLICATION_JUMP_APP_H_ */

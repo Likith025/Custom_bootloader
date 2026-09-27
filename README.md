@@ -110,7 +110,7 @@ Bare-Metal Drivers
 - GPIO (push button, 2 LEDs)
 - USART
 
-**Firmware approach:** Bare-metal — no ST-provided drivers (no HAL, no LL). All peripheral drivers are self-developed, maintained in a separate [STM32F756ZG Bare-Metal Driver](.) repository and included here as a Git submodule.
+**Firmware approach:** Bare-metal — no ST-provided drivers (no HAL, no LL). All peripheral drivers are self-developed, maintained in a separate [STM32F756ZG Bare-Metal Driver](https://github.com/Likith025/STM32F756ZG-Bare-Metal-Driver-Development.git) repository and included here as a Git submodule.
 
 ---
 

@@ -49,7 +49,7 @@ uint8_t Buffer_push(uint8_t value)
 	uint8_t next_head=0;
 	uint8_t reval=1;
 
-		next_head=rx_buffer.head;
+		next_head=rx_buffer.head+1;
 		if(next_head==rx_buffer.tail)
 			{
 				reval=0; //buffer empty
@@ -103,6 +103,8 @@ uint8_t Buffer_pop(uint8_t* pop_val)
 	return reval;
 
 }
+
+
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 

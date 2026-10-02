@@ -57,7 +57,7 @@ void Mcal_usart_init(void)
  */
 void Mcal_usart_send(uint8_t* pTxdata,uint32_t Length)
 {
-	USART_SendData(&USART3_handler, pTxdata, Length);
+	USART_SendData_IT(&USART3_handler, pTxdata, Length);
 }
 
 

@@ -36,6 +36,17 @@ void Ecal_usart_send(uint8_t* pTxdata,uint32_t len)
 	Mcal_usart_send(pTxdata, len);
 }
 
+/**
+ * @brief  Brief description of the function.
+ *
+ * @param  parameter Description of parameter.
+ *
+ * @return Description of return value.
+ */
+void Ecal_usart_init(void)
+{
+	Mcal_usart_init();
+}
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 
 /**

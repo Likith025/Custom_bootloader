@@ -19,6 +19,10 @@
 ring_buffer_t rx_buffer;
 uint8_t buffer[Buffer_SIZE];
 
+uint8_t test_buffer[Buffer_SIZE];
+
+uint8_t buffer_full_status=0;
+uint8_t buffer_empty_status=0;
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -49,9 +53,12 @@ uint8_t Buffer_push(uint8_t value)
 	uint8_t next_head=0;
 	uint8_t reval=1;
 
+	buffer_empty_status=0;
+
 		next_head=rx_buffer.head+1;
 		if(next_head==rx_buffer.tail)
 			{
+				buffer_empty_status=1;
 				reval=0; //buffer empty
 			}
 		else
@@ -63,6 +70,7 @@ uint8_t Buffer_push(uint8_t value)
 
 
 		rx_buffer.buffer[rx_buffer.head]=value;
+		test_buffer[rx_buffer.head]=value;
 		rx_buffer.head=next_head;
 
 	}
@@ -80,6 +88,8 @@ uint8_t Buffer_push(uint8_t value)
 uint8_t Buffer_pop(uint8_t* pop_val)
 {
 	uint8_t reval=1;
+
+	buffer_empty_status=0;
 	if((pop_val==NULL))
 	{
 		reval=0;
@@ -88,6 +98,7 @@ uint8_t Buffer_pop(uint8_t* pop_val)
 	{
 		if(rx_buffer.head==rx_buffer.tail)
 		{
+			buffer_empty_status=1;
 			reval=0;
 		}
 		else

@@ -23,6 +23,7 @@
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
+void Ecal_usart_init(void);
 void Ecal_usart_send(uint8_t* pTxdata,uint32_t len);
 /* Function documentation can be generated using the Doxygen method template. */
 

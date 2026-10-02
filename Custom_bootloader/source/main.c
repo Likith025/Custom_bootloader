@@ -11,22 +11,25 @@
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
 
-#include <stdint.h>
 #include "common_types.h"
-#include "Mcal_gpio.h"
 #include "Ecal_gpio.h"
-#include "Mcal_Usart.h"
+#include "Ecal_Usart.h"
 #include "Mcal_Intrrupt.h"
 #include "digital_signal_services.h"
 #include "print_handler.h"
 #include "Jump_app.h"
 #include "BootLoader.h"
+#include "Buffer_handling.h"
+
+#include "Mcal_Usart.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
-uint8_t txdata[]="liki\n\r";
-uint8_t rxdata[4]={};
-uint8_t msg_count=0;
+volatile uint8_t tx_complete=0;
+uint8_t rx_byte=0;
+
+extern USART_handler_t USART3_handler;
+extern uint8_t buffer_full_status;
 
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
@@ -43,11 +46,14 @@ uint8_t msg_count=0;
 int main()
 {
 	Ecal_gpio_init();
-	Mcal_usart_init();
+	Ecal_usart_init();
 	mcal_intrrupt_config();
 	Get_boot_mode();
+	Mcal_usart_receive(&rx_byte, 1);
 
 	printmsg("entered Bootloader\n\r");
+	 init_buffer();
+	while(!tx_complete); // ensure tx is completed so that irq's can be disabled in jump to application mode
 	if(Boot_mode==Application_mode)
 	{
 		//in application mode
@@ -61,6 +67,7 @@ int main()
 	while(1)
 	{
 
+	//	USART_SendData_IT(&USART3_handler, txdata, 6);
 	}
 }
 
@@ -73,4 +80,20 @@ int main()
  *
  * @return Description of return value.
  */
+void USART_ApplicationEventCallback(USART_handler_t *pUSARTHandle,USART_CallBack_t event)
+{
+if (event==USART_EVENT_RX_CMPL)
+{
+	Mcal_usart_receive(&rx_byte, 1);
+	if(buffer_full_status!=1)
+	{
+	Buffer_push(rx_byte);
+	}
+
+}
+if(event==USART_EVENT_TX_CMPL){
+	pUSARTHandle->UASRT_Txstate=USART_FREE;
+	tx_complete=1;
+}
+}
 

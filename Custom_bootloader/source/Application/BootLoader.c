@@ -14,6 +14,7 @@
 #include "print_handler.h"
 #include "Buffer_handling.h"
 #include "common_types.h"
+#include "cmd_extraction.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
@@ -40,50 +41,8 @@
 		{
 		//printmsg("running in boot mode\n\r");
 	//	for(volatile int i=0;i<2000000;i++);
-			Buffer_pop(&poped_val);
-		if(buffer_empty_status!=1)
-		{
-
-			switch(rx_buffer.buffer[1])
-			{
-				case 0x20:
-				{
-					printmsg("cmd: earse\n\r");
-					break ;
-				}
-
-				case 0x21:
-				{
-					printmsg("cmd: write\n\r");
-					break ;
-				}
-
-				case 0x23:
-				{
-					printmsg("cmd: go to address\n\r");
-					break ;
-				}
-
-				case 0x22:
-				{
-					printmsg("cmd: get CRC \n\r");
-					break ;
-				}
-
-				case 0x30:
-				{
-					printmsg("cmd: get bootloader version\n\r");
-					break ;
-				}
-				default:
-				{
-					printmsg("invalid cmd\n\r");
-					break;
-				}
-
-			}
+			get_cmd_fields();
 		}
-	}
 	}
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/

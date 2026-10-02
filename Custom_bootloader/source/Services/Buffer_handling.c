@@ -23,6 +23,8 @@ uint8_t test_buffer[Buffer_SIZE];
 
 uint8_t buffer_full_status=0;
 uint8_t buffer_empty_status=0;
+
+
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -88,7 +90,6 @@ uint8_t Buffer_push(uint8_t value)
 uint8_t Buffer_pop(uint8_t* pop_val)
 {
 	uint8_t reval=1;
-
 	buffer_empty_status=0;
 	if((pop_val==NULL))
 	{

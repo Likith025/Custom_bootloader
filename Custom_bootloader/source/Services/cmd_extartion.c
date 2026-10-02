@@ -1,36 +1,33 @@
 /**
- * @file    main.c
+ * @file    cmd_extartion.c
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    24-Sept-2026
+ * @date    02-Oct-2026
  */
 
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
-
-#include "common_types.h"
-#include "Ecal_gpio.h"
-#include "Ecal_Usart.h"
-#include "Mcal_Intrrupt.h"
-#include "digital_signal_services.h"
-#include "print_handler.h"
-#include "Jump_app.h"
-#include "BootLoader.h"
+#include "cmd_extraction.h"
 #include "Buffer_handling.h"
 
-#include "Mcal_Usart.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
-
+#define SOF_idx		0
+#define CMD_idx		1
+#define LEN_idx		2
+#define MAX_PAYLOAD_LEN	128
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
-volatile uint8_t tx_complete=0;
-uint8_t rx_byte=0;
+extern ring_buffer_t rx_buffer;
+uint8_t SOF_data=0xA5;
+uint8_t CMD_data;
+uint8_t LEN_data;
+uint8_t Payload_data[MAX_PAYLOAD_LEN];
+uint8_t CRC_data;
 
-extern USART_handler_t USART3_handler;
-extern uint8_t buffer_full_status;
-
+ uint8_t CRC_cal=0;
+ Ext_states_e state=SOF_ext;
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -42,35 +39,81 @@ extern uint8_t buffer_full_status;
  *
  * @return Description of return value.
  */
-
-int main()
+void get_cmd_fields()
 {
-	Ecal_gpio_init();
-	Ecal_usart_init();
-	mcal_intrrupt_config();
-	Get_boot_mode();
-	Mcal_usart_receive(&rx_byte, 1);
+	static uint8_t idx;
+	uint8_t rx_byte;
 
-	printmsg("entered Bootloader\n\r");
-	 init_buffer();
-	while(!tx_complete); // ensure tx is completed so that irq's can be disabled in jump to application mode
-	if(Boot_mode==Application_mode)
+	while(Buffer_pop(&rx_byte))
 	{
-		//in application mode
-		jump_to_application();
-	}
-	else
-	{
-		bootloader_run();
+		switch(state)
+		{
+		case SOF_ext:{
+			if(rx_byte==SOF_data)
+			{
+				state=Cmd_ext;
+				CRC_cal=0;
+			}
+			else{
+				state=error;
+			}
+			break;
+		}
+		case Cmd_ext:{
+			CMD_data=rx_byte;
+			CRC_cal^=rx_byte;
+			state=Len_ext;
+			break;
+		}
+		case Len_ext:
+		{
+			LEN_data=rx_byte;
+			CRC_cal^=rx_byte;
+			if(LEN_data>MAX_PAYLOAD_LEN)
+			{
+				// BL_NACK_INVALID_LEN case, bail before writing any payload
+				state=error;
+				break;
+			}
 
-	}
-	while(1)
-	{
+			idx=0;
+			state=(LEN_data==0)?Check_sum_ext:Payload_ext;
+			break;
+		}
+		case Payload_ext:{
+			Payload_data[idx++]=rx_byte;
+			CRC_cal^=rx_byte;
+			if(idx>=LEN_data)
+			{
+				idx=0;
+				state=Check_sum_ext;
+			}
+			break;
+		}
+		case Check_sum_ext:{
+			CRC_data=rx_byte;
+			if(CRC_data==CRC_cal)
+			{
 
-	//	USART_SendData_IT(&USART3_handler, txdata, 6);
+			}
+			else
+			{
+
+			}
+			state=SOF_ext;
+			break;
+		}
+		case error:
+		{
+			//sof error;
+			idx=0;
+			state=SOF_ext;
+			break;
+		}
+		}
+
 	}
 }
-
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 
 /**
@@ -80,20 +123,3 @@ int main()
  *
  * @return Description of return value.
  */
-void USART_ApplicationEventCallback(USART_handler_t *pUSARTHandle,USART_CallBack_t event)
-{
-if (event==USART_EVENT_RX_CMPL)
-{
-	Mcal_usart_receive(&rx_byte, 1);
-	if(buffer_full_status!=1)
-	{
-	Buffer_push(rx_byte);
-	}
-
-}
-if(event==USART_EVENT_TX_CMPL){
-	pUSARTHandle->UASRT_Txstate=USART_FREE;
-	tx_complete=1;
-}
-}
-

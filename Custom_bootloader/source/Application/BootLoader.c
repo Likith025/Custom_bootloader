@@ -12,31 +12,38 @@
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
 #include "BootLoader.h"
 #include "print_handler.h"
+#include "Buffer_handling.h"
 #include "common_types.h"
+#include "cmd_extraction.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
+	  uint8_t poped_val;
+	  uint8_t pop_ctrl=0;
 
-/*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
+	  extern ring_buffer_t rx_buffer;
+	  extern uint8_t buffer_empty_status;
+	/*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
-/**
- * @brief  Brief description of the function.
- *
- * @param  parameter Description of parameter.
- *
- * @return Description of return value.
- */
-void bootloader_run(void)
-{
-	while(1)
+	/*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
+
+	/**
+	 * @brief  Brief description of the function.
+	 *
+	 * @param  parameter Description of parameter.
+	 *
+	 * @return Description of return value.
+	 */
+	void bootloader_run(void)
 	{
-	printmsg("running in boot mode\n\r");
-	for(volatile int i=0;i<2000000;i++);
+		while(1)
+		{
+		//printmsg("running in boot mode\n\r");
+	//	for(volatile int i=0;i<2000000;i++);
+			get_cmd_fields();
+		}
 	}
-}
-
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 

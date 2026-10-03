@@ -10,8 +10,8 @@
 
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
+#include <usart_tx_service.h>
 #include "BootLoader.h"
-#include "print_handler.h"
 #include "Buffer_handling.h"
 #include "common_types.h"
 #include "cmd_extraction.h"
@@ -44,6 +44,8 @@
 			get_cmd_fields();
 		}
 	}
+
+
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 

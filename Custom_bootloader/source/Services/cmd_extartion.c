@@ -14,7 +14,7 @@
 #include "Buffer_handling.h"
 #include "BootLoader.h"
 #include "usart_tx_service.h"
-
+#include "flash_services.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
@@ -150,7 +150,9 @@ void dispatch_cmd(cmd_pack_t *rx_cmd)
    }
    case BL_FLASH_ERASE:
     {
-
+    	printmsg("received erase cmd\n\r");
+//    	for(int i=0;i<10000;i++);
+    	erase_flash();
  	   break;
     }
    case BL_MEM_WRITE:

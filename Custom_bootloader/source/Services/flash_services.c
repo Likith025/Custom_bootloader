@@ -38,7 +38,7 @@ void erase_flash(void)
 		printmsg("erased sector %d\n\r",i);
 	}
 
-	Flash_EraseSector(2);
+//	Flash_EraseSector(2);
 }
 
 

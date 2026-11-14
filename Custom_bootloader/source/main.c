@@ -53,7 +53,7 @@ int main()
 
 	printmsg("entered Bootloader\n\r");
 	 init_buffer();
-	while(!tx_complete); // ensure tx is completed so that irq's can be disabled in jump to application mode
+	//while(!tx_complete); // ensure tx is completed so that irq's can be disabled in jump to application mode
 	if(Boot_mode==Application_mode)
 	{
 		//in application mode

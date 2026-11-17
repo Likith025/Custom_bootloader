@@ -77,7 +77,7 @@ typedef struct cmd_tag
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
 void get_cmd_fields(void);
 void dispatch_cmd(cmd_pack_t* rx_cmd);
-void get_boot_version( cmd_pack_t* rx_cmd );
+
 uint8_t cal_crc(response_pack_t* response);
 /* Function documentation can be generated using the Doxygen method template. */
 

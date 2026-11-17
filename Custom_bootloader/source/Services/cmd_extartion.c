@@ -15,6 +15,7 @@
 #include "BootLoader.h"
 #include "usart_tx_service.h"
 #include "flash_services.h"
+#include "Bootloader_services.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
@@ -157,7 +158,7 @@ void dispatch_cmd(cmd_pack_t *rx_cmd)
     }
    case BL_MEM_WRITE:
     {
-
+    	write_flash(rx_cmd);
  	   break;
     }
    case BL_GET_CRC:
@@ -180,27 +181,7 @@ void dispatch_cmd(cmd_pack_t *rx_cmd)
 	 *
 	 * @return Description of return value.
 	 */
-void get_boot_version( cmd_pack_t* rx_cmd )
-{
-	response_pack_t boot_version;
-	boot_version.response_cmd=rx_cmd->cmd;
 
-	if(rx_cmd->len!=0)
-	{
-		boot_version.response_status=BL_NACK_INVALID_LEN;
-		boot_version.response_len=0x00;
-	}
-	else
-	{
-		boot_version.response_status=BL_ACK;
-		boot_version.response_len=0x01;
-		boot_version.response_payload[0]=Bootloader_version;
-	}
-
-	send_response(& boot_version);
-
-
-}
 /**
 	 * @brief  Brief description of the function.
 	 *

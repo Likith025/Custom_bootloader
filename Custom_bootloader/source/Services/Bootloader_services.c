@@ -13,6 +13,7 @@
 #include "Bootloader_services.h"
 #include "cmd_extraction.h"
 #include "usart_tx_service.h"
+#include "Ecal_timer.h"
 
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 #define Bootloader_version 		0x1

@@ -16,8 +16,9 @@
 #include "usart_tx_service.h"
 #include "flash_services.h"
 #include "Bootloader_services.h"
+#include "Ecal_timer.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
-
+#define FRAME_TIMEOUT_MS   100U
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
 extern ring_buffer_t rx_buffer;
 
@@ -28,6 +29,8 @@ uint8_t CRC_data;
 
 uint8_t CRC_cal=0;
 Ext_states_e state=SOF_ext;
+
+
 
 cmd_pack_t received_cmd;
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
@@ -40,86 +43,84 @@ static void send_nack(Cmd_list_e cmd, uint8_t status);
 	 *
 	 * @return Description of return value.
 	 */
-void get_cmd_fields()
+void get_cmd_fields(void)
 {
-	static uint8_t idx;
-	uint8_t rx_byte;
+    static uint32_t last_rx_ms;
+    static uint8_t  idx;
+    uint8_t rx_byte;
 
-	while(Buffer_pop(&rx_byte))
-	{
-		switch(state)
-		{
-		case SOF_ext:
-		{
-			if(rx_byte==SOF_data)
-			{
-				state=Cmd_ext;
-				CRC_cal=0;
-			}
-			else{
-				state=error;
-			}
-			break;
-		}
-		case Cmd_ext:
-		{
-			received_cmd.cmd=(Cmd_list_e)rx_byte;
-			CRC_cal^=rx_byte;
-			state=Len_ext;
-			break;
-		}
-		case Len_ext:
-		{
-			received_cmd.len=rx_byte;
-			CRC_cal^=rx_byte;
-			if(received_cmd.len>MAX_PAYLOAD_LEN)
-			{
-			//	send_nack(received_cmd.cmd, BL_NACK_INVALID_LEN);
-				state=error;
-				break;
-			}
-			idx=0;
-			state=(received_cmd.len==0)?Check_sum_ext:Payload_ext;
-			break;
-		}
-		case Payload_ext:{
-			received_cmd.payload[idx++]=rx_byte;
-			CRC_cal^=rx_byte;
-			if(idx>=received_cmd.len)
-			{
-				idx=0;
-				state=Check_sum_ext;
-			}
-			break;
-		}
-		case Check_sum_ext:
-		{
-			received_cmd.crc=rx_byte;
+    /* abandon a half-received frame if the line went quiet */
+    if ((state != SOF_ext) && Ecal_tick_elapsed(last_rx_ms, FRAME_TIMEOUT_MS))
+    {
+        state = SOF_ext;
+        idx   = 0U;
+    }
 
-			if(received_cmd.crc==CRC_cal)
-			{
-				dispatch_cmd(&received_cmd);
+    while (Buffer_pop(&rx_byte))
+    {
+        last_rx_ms = Ecal_get_tick_ms();
 
-			}
-			else
-			{
-				send_nack(received_cmd.cmd, BL_NACK_CHECKSUM);
-			}
-			state=SOF_ext;
-			break;
-		}
-		case error:
-		{
-			//sof error;
-			idx=0;
-			state=SOF_ext;
-			break;
-		}
-		}
+        switch (state)
+        {
+        case SOF_ext:
+            if (rx_byte == SOF_data)
+            {
+                CRC_cal = 0U;
+                state   = Cmd_ext;
+            }
+            /* anything else: ignore, stay in SOF_ext */
+            break;
 
-	}
+        case Cmd_ext:
+            received_cmd.cmd = (Cmd_list_e)rx_byte;
+            CRC_cal ^= rx_byte;
+            state = Len_ext;
+            break;
+
+        case Len_ext:
+            received_cmd.len = rx_byte;
+            CRC_cal ^= rx_byte;
+            if (received_cmd.len > MAX_PAYLOAD_LEN)
+            {
+                send_nack(received_cmd.cmd, BL_NACK_INVALID_LEN);
+                state = SOF_ext;
+                break;
+            }
+            idx   = 0U;
+            state = (received_cmd.len == 0U) ? Check_sum_ext : Payload_ext;
+            break;
+
+        case Payload_ext:
+            received_cmd.payload[idx++] = rx_byte;
+            CRC_cal ^= rx_byte;
+            if (idx >= received_cmd.len)
+            {
+                idx   = 0U;
+                state = Check_sum_ext;
+            }
+            break;
+
+        case Check_sum_ext:
+            received_cmd.crc = rx_byte;
+            if (received_cmd.crc == CRC_cal)
+            {
+                dispatch_cmd(&received_cmd);
+                last_rx_ms = Ecal_get_tick_ms();   /* erase can take seconds: restart the clock */
+            }
+            else
+            {
+                send_nack(received_cmd.cmd, BL_NACK_CHECKSUM);
+            }
+            state = SOF_ext;
+            break;
+
+        default:
+            state = SOF_ext;
+            idx   = 0U;
+            break;
+        }
+    }
 }
-
 /**
 	 * @brief  Brief description of the function.
 	 *

@@ -15,7 +15,11 @@
 #include "usart_tx_service.h"
 #include "flash_services.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
+#define WRITE_ADDR_LEN       4U
+#define MAX_WRITE_DATA_LEN   128U
 
+#define APP_FLASH_START      0x08008000UL   /* confirm against your app's linker script */
+#define APP_FLASH_END        0x080FFFFFUL   /* last byte of the app region */
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
 uint32_t address_test=0;
 uint8_t payload_test[128]={0};
@@ -33,38 +37,37 @@ uint8_t payload_test[128]={0};
 
 void erase_flash(cmd_pack_t *rx_cmd)
 {
-	response_pack_t erase_res;
-	Flash_StatusType_e status;
-	erase_res.response_cmd=rx_cmd->cmd;
-	erase_res.response_len=0;
-	status=Flash_Unlock();
-	if( status==Status_OK)
-	{
-		for(int i=2;i<=7;i++)
-		{
-			status=Flash_EraseSector(i);
-			erase_res.response_status=BL_ACK;
-			printmsg("erased sector %d\n\r",i);
-			if(status!=Status_OK)
-			{
-				erase_res.response_status=BL_NACK_ERASE_FAIL;
-				break;
-			}
-		}
-	}
-	else
-	{
-		erase_res.response_status=BL_NACK_TIMEOUT;
-	}
+    response_pack_t erase_res = {0};
+    Flash_StatusType_e status;
 
-	Flash_Lock();
-//for(volatile int i=0;i<10000000;i++);
-	send_response(&erase_res);
+    erase_res.response_cmd    = rx_cmd->cmd;
+    erase_res.response_status = BL_ACK;
 
-//	Flash_EraseSector(2);
+    if (rx_cmd->len != 0U)
+    {
+        erase_res.response_status = BL_NACK_INVALID_LEN;
+    }
+    else if (Flash_Unlock() != Status_OK)
+    {
+        erase_res.response_status = BL_NACK_TIMEOUT;
+    }
+    else
+    {
+        for (int i = 2; i <= 7; i++)
+        {
+            status = Flash_EraseSector(i);
+            printmsg("erased sector %d\n\r", i);
+            if (status != Status_OK)
+            {
+                erase_res.response_status = BL_NACK_ERASE_FAIL;
+                break;
+            }
+        }
+        Flash_Lock();
+    }
+
+    send_response(&erase_res);
 }
-
-
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 
 /**
@@ -77,35 +80,49 @@ void erase_flash(cmd_pack_t *rx_cmd)
 
 void write_flash(cmd_pack_t *rx_cmd)
 {
-	uint32_t temp_address=0;
-	temp_address=((rx_cmd->payload[3]<<24)|(rx_cmd->payload[2]<<16)|(rx_cmd->payload[1]<<8)|(rx_cmd->payload[0]));
-	address_test=temp_address;
-	Flash_StatusType_e status;
+    response_pack_t res = {0};
+    res.response_cmd    = rx_cmd->cmd;
+    res.response_status = BL_ACK;
 
-	status = Flash_Unlock();
+    if ((rx_cmd->len <= WRITE_ADDR_LEN) ||
+        ((rx_cmd->len - WRITE_ADDR_LEN) > MAX_WRITE_DATA_LEN))
+    {
+        res.response_status = BL_NACK_INVALID_LEN;
+    }
+    else
+    {
+        uint32_t data_len = (uint32_t)rx_cmd->len - WRITE_ADDR_LEN;
+        uint32_t addr = ((uint32_t)rx_cmd->payload[3] << 24) |
+                        ((uint32_t)rx_cmd->payload[2] << 16) |
+                        ((uint32_t)rx_cmd->payload[1] << 8)  |
+                         (uint32_t)rx_cmd->payload[0];
 
-	if (status != Status_OK)
-	{
-	    return;
-	}
+        if ((addr < APP_FLASH_START) ||
+            (addr > (APP_FLASH_END + 1UL - data_len)))
+        {
+            res.response_status = BL_NACK_INVALID_ADDR;   /* add to your enum if missing */
+        }
+        else if (Flash_Unlock() != Status_OK)
+        {
+            res.response_status = BL_NACK_WRITE_FAIL;     /* not unlocked: do not lock */
+        }
+        else
+        {
+            for (uint32_t i = 0U; i < data_len; i++)
+            {
+                if (Flash_Write(FLASH_TYPEPROGRAM_BYTE, addr + i,
+                                rx_cmd->payload[WRITE_ADDR_LEN + i]) != Status_OK)
+                {
+                    res.response_status = BL_NACK_WRITE_FAIL;
+                    break;
+                }
+            }
+            Flash_Lock();
+        }
+    }
 
-	for (uint16_t i = 0; i < 128; i++)
-	{
-	    status = Flash_Write(FLASH_TYPEPROGRAM_BYTE,
-	                         address_test + i,
-	                         rx_cmd->payload[4 + i]);
-
-	    if (status != Status_OK)
-	    {
-	        printmsg("Flash write failed at offset: %d\r\n", i);
-	        break;
-	    }
-	}
-
-	Flash_Lock();
-
+    send_response(&res);
 }
-
 //void write_flash(cmd_pack_t *rx_cmd)
 //{
 //	response_pack_t flash_write_res;

@@ -20,7 +20,7 @@
 #include "Jump_app.h"
 #include "BootLoader.h"
 #include "Buffer_handling.h"
-
+#include "Ecal_timer.h"
 #include "Mcal_Usart.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
@@ -50,7 +50,7 @@ int main()
 	mcal_intrrupt_config();
 	Get_boot_mode();
 	Mcal_usart_receive(&rx_byte, 1);
-
+	 Ecal_timer_init();
 	printmsg("entered Bootloader\n\r");
 	 init_buffer();
 	//while(!tx_complete); // ensure tx is completed so that irq's can be disabled in jump to application mode

@@ -31,7 +31,7 @@ Ext_states_e state=SOF_ext;
 
 cmd_pack_t received_cmd;
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
-
+static void send_nack(Cmd_list_e cmd, uint8_t status);
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
 /**
 	 * @brief  Brief description of the function.
@@ -74,6 +74,7 @@ void get_cmd_fields()
 			CRC_cal^=rx_byte;
 			if(received_cmd.len>MAX_PAYLOAD_LEN)
 			{
+			//	send_nack(received_cmd.cmd, BL_NACK_INVALID_LEN);
 				state=error;
 				break;
 			}
@@ -102,7 +103,7 @@ void get_cmd_fields()
 			}
 			else
 			{
-
+				send_nack(received_cmd.cmd, BL_NACK_CHECKSUM);
 			}
 			state=SOF_ext;
 			break;
@@ -181,7 +182,13 @@ void dispatch_cmd(cmd_pack_t *rx_cmd)
 	 *
 	 * @return Description of return value.
 	 */
-
+static void send_nack(Cmd_list_e cmd, uint8_t status)
+{
+    response_pack_t res = {0};          /* zero-init: response_len = 0 */
+    res.response_cmd    = cmd;
+    res.response_status = status;
+    send_response(&res);
+}
 /**
 	 * @brief  Brief description of the function.
 	 *

@@ -51,28 +51,39 @@
  * @return Description of return value.
  */
 
-void send_response(response_pack_t* resp)
-{
-    uint8_t tx_buf[1 + 1 + 1 + 1 + MAX_PAYLOAD_LEN + 1];  // SOF+CMD+STATUS+LEN+PAYLOAD+CRC
-    uint8_t idx = 0;
+ void send_response(response_pack_t *resp)
+ {
+     uint8_t tx_buf[1U + 1U + 1U + 1U + MAX_PAYLOAD_LEN + 1U];
+     uint8_t idx = 0U;
 
-    resp->response_crc = cal_crc(resp);   // computed here, not by the caller
+     if (resp == NULL)
+     {
+         return;
+     }
 
-    tx_buf[idx++] = RESP_SOF_data;         // 0xC3
-    tx_buf[idx++] = resp->response_cmd;
-    tx_buf[idx++] = resp->response_status;
-    tx_buf[idx++] = resp->response_len;
+ 
+     if (resp->response_len > MAX_PAYLOAD_LEN)
+     {
+         resp->response_len = 0U;
+         resp->response_status = BL_NACK_INVALID_LEN; 
+     }
 
-    for (uint8_t i = 0; i < resp->response_len; i++)
-    {
-        tx_buf[idx++] = resp->response_payload[i];
-    }
+     resp->response_crc = cal_crc(resp);   
 
-    tx_buf[idx++] = resp->response_crc;
+     tx_buf[idx++] = RESP_SOF_data;
+     tx_buf[idx++] = (uint8_t)resp->response_cmd;
+     tx_buf[idx++] = (uint8_t)resp->response_status;
+     tx_buf[idx++] = resp->response_len;
 
-    Ecal_usart_send(tx_buf, idx);
-}
+     for (uint8_t i = 0U; i < resp->response_len; i++)
+     {
+         tx_buf[idx++] = resp->response_payload[i];
+     }
 
+     tx_buf[idx++] = resp->response_crc;
+
+     (void)Ecal_usart_send(tx_buf, idx);
+ }
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 
 /**

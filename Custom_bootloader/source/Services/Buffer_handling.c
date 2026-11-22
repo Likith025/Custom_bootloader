@@ -14,8 +14,8 @@
 #include "Ecal_usart.h"
 
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
-#define Buffer_SIZE		12U
-/* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
+#define Buffer_SIZE		200U
+/* ----------------------------------------------------------------- Global variables ------------------------------------------------------------------*/
 ring_buffer_t rx_buffer;
 uint8_t buffer[Buffer_SIZE];
 
@@ -24,6 +24,7 @@ uint8_t test_buffer[Buffer_SIZE];
 uint8_t buffer_full_status=0;
 uint8_t buffer_empty_status=0;
 
+volatile uint8_t rx_overrun_count;
 
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
@@ -52,33 +53,26 @@ void init_buffer()
  */
 uint8_t Buffer_push(uint8_t value)
 {
-	uint8_t next_head=0;
-	uint8_t reval=1;
+    uint8_t reval = 0U;
+    uint8_t next_head = (uint8_t)(rx_buffer.head + 1U);
 
-	buffer_empty_status=0;
+    if (next_head >= rx_buffer.size)
+    {
+        next_head = 0U;
+    }
 
-		next_head=rx_buffer.head+1;
-		if(next_head==rx_buffer.tail)
-			{
-				buffer_empty_status=1;
-				reval=0; //buffer empty
-			}
-		else
-		{
-		if(next_head>=Buffer_SIZE)
-		{
-			next_head=0;
-		}
-
-
-		rx_buffer.buffer[rx_buffer.head]=value;
-		test_buffer[rx_buffer.head]=value;
-		rx_buffer.head=next_head;
-
-	}
-		return reval;
+    if (next_head != rx_buffer.tail)
+    {
+        rx_buffer.buffer[rx_buffer.head] = value;
+        rx_buffer.head = next_head;
+        reval = 1U;
+    }
+    else
+    {
+        rx_overrun_count++;   /* declare: volatile uint32_t */
+    }
+    return reval;
 }
-
 
 	/**
 	 * @brief  Brief description of the function.

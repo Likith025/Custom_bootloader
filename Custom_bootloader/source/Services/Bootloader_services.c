@@ -1,22 +1,24 @@
 /**
- * @file    print_handler.c
+ * @file    Bootloader_services.c
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    27-Sept-2026
+ * @date    02-Oct-2026
  */
 
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
-#include "print_handler.h"
-#include "Ecal_usart.h"
+#include "Bootloader_services.h"
+#include "cmd_extraction.h"
+#include "usart_tx_service.h"
+#include "Ecal_timer.h"
 
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
-
+#define Bootloader_version 		0x1
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
- char str[80];
+
 /*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -28,20 +30,27 @@
  *
  * @return Description of return value.
  */
-void printmsg(char *format,...)
+void get_boot_version( cmd_pack_t* rx_cmd )
 {
+	response_pack_t boot_version;
+	boot_version.response_cmd=rx_cmd->cmd;
 
+	if(rx_cmd->len!=0)
+	{
+		boot_version.response_status=BL_NACK_INVALID_LEN;
+		boot_version.response_len=0x00;
+	}
+	else
+	{
+		boot_version.response_status=BL_ACK;
+		boot_version.response_len=0x01;
+		boot_version.response_payload[0]=Bootloader_version;
+	}
 
-  /*Extract the the argument list using VA apis */
-  va_list args;
-  va_start(args, format);
-  vsprintf(str, format,args);
-  Ecal_usart_send((uint8_t*)str, strlen(str));
-  va_end(args);
+	send_response(& boot_version);
+
 
 }
-
-
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 
 /**

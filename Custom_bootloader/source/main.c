@@ -11,16 +11,16 @@
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
 
+#include <usart_tx_service.h>
 #include "common_types.h"
 #include "Ecal_gpio.h"
 #include "Ecal_Usart.h"
 #include "Mcal_Intrrupt.h"
 #include "digital_signal_services.h"
-#include "print_handler.h"
 #include "Jump_app.h"
 #include "BootLoader.h"
 #include "Buffer_handling.h"
-
+#include "Ecal_timer.h"
 #include "Mcal_Usart.h"
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
@@ -50,10 +50,10 @@ int main()
 	mcal_intrrupt_config();
 	Get_boot_mode();
 	Mcal_usart_receive(&rx_byte, 1);
-
+	 Ecal_timer_init();
 	printmsg("entered Bootloader\n\r");
 	 init_buffer();
-	while(!tx_complete); // ensure tx is completed so that irq's can be disabled in jump to application mode
+	//while(!tx_complete); // ensure tx is completed so that irq's can be disabled in jump to application mode
 	if(Boot_mode==Application_mode)
 	{
 		//in application mode

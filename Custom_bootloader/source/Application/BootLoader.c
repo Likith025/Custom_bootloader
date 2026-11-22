@@ -10,11 +10,14 @@
 
 
 /* ------------------------------------------------------------------Includes ------------------------------------------------------------------*/
+#include <usart_tx_service.h>
 #include "BootLoader.h"
-#include "print_handler.h"
 #include "Buffer_handling.h"
 #include "common_types.h"
 #include "cmd_extraction.h"
+#include "Ecal_gpio.h"
+#include "Ecal_timer.h"
+
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
@@ -24,6 +27,8 @@
 
 	  extern ring_buffer_t rx_buffer;
 	  extern uint8_t buffer_empty_status;
+
+	  static TIMER_handler_t tick_timer;
 	/*------------------------------------------------------------------ Local / static function prototypes ------------------------------------------------------------------*/
 
 	/*------------------------------------------------------------------ Global function  ------------------------------------------------------------------*/
@@ -37,13 +42,17 @@
 	 */
 	void bootloader_run(void)
 	{
+		enable_e val=enable;
 		while(1)
 		{
-		//printmsg("running in boot mode\n\r");
-	//	for(volatile int i=0;i<2000000;i++);
+
 			get_cmd_fields();
+			Ecal_digital_write(Error_led, val);
+			val=~val;
 		}
 	}
+
+
 
 /*------------------------------------------------------------------ Local function  ------------------------------------------------------------------*/
 

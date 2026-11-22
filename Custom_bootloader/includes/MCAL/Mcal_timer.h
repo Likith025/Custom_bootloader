@@ -1,21 +1,18 @@
 /**
- * @file    print_handler.h
+ * @file    Mcal_timer.h
  * @brief   Brief description of the file.
  *
  * @details Detailed description of the file.
  *
  * @author  likith
- * @date    27-Sept-2026
+ * @date    22-Nov-2026
  */
 
-#ifndef SERVICES_PRINT_HANDLER_H_
-#define SERVICES_PRINT_HANDLER_H_
+#ifndef MCAL_MCAL_TIMER_H_
+#define MCAL_MCAL_TIMER_H_
 
 /*------------------------------------------------------------------ Includes ------------------------------------------------------------------*/
 
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
 
 /*------------------------------------------------------------------ Exported macros ------------------------------------------------------------------*/
 
@@ -26,8 +23,10 @@
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
-void printmsg(char *format,...);
+void Mcal_Timer_Init(void);
+void Mcal_Timer_start(void);
+uint32_t Mcal_timer_get_count(void);
 /* Function documentation can be generated using the Doxygen method template. */
 
 
-#endif /* SERVICES_PRINT_HANDLER_H_ */
+#endif /* MCAL_MCAL_TIMER_H_ */

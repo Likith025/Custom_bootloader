@@ -31,10 +31,10 @@
  *
  * @return Description of return value.
  */
-void Ecal_usart_send(uint8_t* pTxdata,uint32_t len)
-{
-	Mcal_usart_send(pTxdata, len);
-}
+	void Ecal_usart_send(uint8_t* pTxdata,uint32_t len)
+	{
+		Mcal_usart_send(pTxdata, len);
+	}
 
 /**
  * @brief  Brief description of the function.

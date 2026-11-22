@@ -15,6 +15,8 @@
 #include "Buffer_handling.h"
 #include "common_types.h"
 #include "cmd_extraction.h"
+#include "Ecal_gpio.h"
+
 /*------------------------------------------------------------------ Macros ------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------ Global variables ------------------------------------------------------------------*/
@@ -37,11 +39,13 @@
 	 */
 	void bootloader_run(void)
 	{
+		enable_e val=enable;
 		while(1)
 		{
-		//printmsg("running in boot mode\n\r");
-	//	for(volatile int i=0;i<2000000;i++);
+
 			get_cmd_fields();
+			Ecal_digital_write(Error_led, val);
+			val=~val;
 		}
 	}
 

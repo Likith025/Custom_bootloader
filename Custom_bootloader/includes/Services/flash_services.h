@@ -24,7 +24,7 @@
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
-void erase_flash(void);
+void erase_flash(cmd_pack_t *rx_cmd);
 void write_flash(cmd_pack_t *rx_cmd);
 /* Function documentation can be generated using the Doxygen method template. */
 

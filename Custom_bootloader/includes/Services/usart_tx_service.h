@@ -27,7 +27,7 @@
 /*------------------------------------------------------------------ Exported variables ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------ Exported function prototypes ------------------------------------------------------------------*/
-void printmsg(char *format,...);
+void printmsg(const char *format, ...);
 void send_response(response_pack_t* resp);
 /* Function documentation can be generated using the Doxygen method template. */
 

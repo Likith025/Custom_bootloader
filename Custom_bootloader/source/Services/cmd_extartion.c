@@ -153,7 +153,7 @@ void dispatch_cmd(cmd_pack_t *rx_cmd)
     {
     	printmsg("received erase cmd\n\r");
 //    	for(int i=0;i<10000;i++);
-    	erase_flash();
+    	erase_flash(rx_cmd);
  	   break;
     }
    case BL_MEM_WRITE:

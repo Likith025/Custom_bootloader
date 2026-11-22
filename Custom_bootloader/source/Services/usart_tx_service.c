@@ -29,18 +29,19 @@
  *
  * @return Description of return value.
  */
-void printmsg(char *format,...)
-{
-
-
-  /*Extract the the argument list using VA apis */
-  va_list args;
-  va_start(args, format);
-  vsprintf(str, format,args);
-  Ecal_usart_send((uint8_t*)str, strlen(str));
-  va_end(args);
-
-}
+ void printmsg(const char *format, ...)
+ {
+     uint8_t buf[2 + 128];
+     va_list args;
+     va_start(args, format);
+     int n = vsnprintf((char*)&buf[2], 128, format, args);
+     va_end(args);
+     if (n < 0) return;
+     if (n > 127) n = 127;          /* vsnprintf returns would-be length */
+     buf[0] = 0x5A;                 /* SOF_DBG */
+     buf[1] = (uint8_t)n;
+     Ecal_usart_send(buf, 2 + n);
+ }
 
 /**
  * @brief  Brief description of the function.
